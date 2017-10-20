@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+  <script src="components/loader.js"></script>
+  <script src="lib/onsenui/js/onsenui.min.js"></script>
+
+  <link rel="stylesheet" href="components/loader.css">
+  <link rel="stylesheet" href="lib/onsenui/css/onsenui.css">
+  <link rel="stylesheet" href="lib/onsenui/css/onsen-css-components.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <script>
+    // ons.ready(function() {
+    //   console.log("Onsen UI is ready!");
+    // });
+    //問題データを取得する
+    var questions;    
+    $.getJSON("data.json", function(result){
+        json_data = result;
+    })
+    var next_q; //次に開く問題番号
+    var kekka;  //診断結果
+
+    //各ページが開いた時
+    document.addEventListener('init',function(event){
+        //開いたページがどのページか
+        var page = event.target;
+        
+        //各ページが開いたとき
+        if(page.id == "top-page"){
+            //イベントを設定
+            $("#btn_start").on("click",function(){
+                next_q = 0;
+                document.getElementById("navi").pushPage("question.html",{animation:"fade"});
+            })
+            
+        }else if(page.id == "question-page"){
+            //タイトルを設定
+            var title = json_data.questions[next_q].title;
+            page.querySelector('#title').innerHTML = title;
+            
+            //設問内容を設定
+            var question = json_data.questions[next_q].question;
+            page.querySelector('#question').innerHTML = question;
+            
+            //イベントを設定
+            //yesボタン押下時の処理
+            $(".yes-btn").on("click",function(){
+                console.log("yes");
+                
+                console.log("next_q:" + next_q);
+                //次指定が数値か？
+                if(isNaN(json_data.questions[next_q].next_y)){
+                    //結果ページを表示する
+                    kekka = json_data.questions[next_q].next_y;
+                    document.getElementById("navi").pushPage("result.html",{animation:"fade"});
+                }else{
+                    next_q = json_data.questions[next_q].next_y;
+                    document.getElementById("navi").pushPage("question.html",{animation:"fade"});
+                }
+            })
+            
+            //noボタン押下時の処理
+            $(".no-btn").on("click",function(){
+                console.log("no");
+
+                console.log("next_q:" + next_q);
+                //次指定が数値か？
+                if(isNaN(json_data.questions[next_q].next_n)){
+                    //結果ページを表示する
+                    kekka = json_data.questions[next_q].next_n;
+                    document.getElementById("navi").pushPage("result.html",{animation:"fade"});
+                }else{
+                    next_q = json_data.questions[next_q].next_n;
+                    document.getElementById("navi").pushPage("question.html",{animation:"fade"});
+                }
+            })
+            
+        }else if(page.id="result-page"){
+            //結果ページ
+            //タイトルを設定
+            //var title = json_data.questions[next_q].title;
+            // console.log("kekka!=" + kekka);
+            // console.log(json_data[kekka]["kekka"]);
+            var title = json_data[kekka]["kekka"];
+            var syosai = json_data[kekka]["syosai"];
+            
+            page.querySelector('#kekka').innerHTML = title;            
+            page.querySelector('#syosai').innerHTML = syosai;            
+
+        }
+    })
+
+</script>
+    
+    
+</head>
+<body>
+    <ons-navigator page="top.html" id="navi"></ons-navigator>
+
+    
+    
+</body>
+</html>
